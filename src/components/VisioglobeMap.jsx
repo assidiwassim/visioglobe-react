@@ -2,24 +2,22 @@ import { useEffect, useRef, useState } from "react";
 
 const VisioglobeMap = () => {
   const mapContainerRef = useRef(null);
+  const essentialRef = useRef(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  let essential;
 
   useEffect(() => {
     const initializeVisioglobe = async () => {
       if (!window.VisioWebEssential || !window.visioweb) {
-        console.error(
-          "VisioWeb SDK is missing. Make sure the scripts are included in index.html."
-        );
+        console.error("VisioWeb SDK is missing. Ensure scripts are included in index.html.");
         return;
       }
 
-      essential = new window.VisioWebEssential({
+      essentialRef.current = new window.VisioWebEssential({
         element: mapContainerRef.current,
         imagePath: "/static/img",
       });
 
-      essential.setParameters({
+      essentialRef.current.setParameters({
         parameters: {
           baseURL: "https://mapserver.visioglobe.com/",
           hash: "kf8c4780d7f58387df3e142068450cc86f28045d1",
@@ -28,7 +26,7 @@ const VisioglobeMap = () => {
       });
 
       try {
-        await essential.createMapviewer();
+        await essentialRef.current.createMapviewer();
         console.log("Visioglobe Map Loaded Successfully");
         setMapLoaded(true);
       } catch (error) {
@@ -40,15 +38,19 @@ const VisioglobeMap = () => {
       initializeVisioglobe();
     }
 
-    return () => {};
-  }, []);
+    return () => {
+      if (essentialRef.current) {
+        essentialRef.current = null;
+      }
+    };
+  }, [mapLoaded]);
 
   return (
     <div
       id="map-container"
       ref={mapContainerRef}
-      class="uk-container uk-container-expand uk-position-relative uk-padding-remove"
-      uk-height-viewport="expand:true"
+      className="uk-container uk-container-expand uk-position-relative uk-padding-remove"
+      uk-height-viewport="expand: true"
     />
   );
 };
